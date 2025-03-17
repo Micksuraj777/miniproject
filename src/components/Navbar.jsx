@@ -21,6 +21,7 @@ const Navbar = () => {
   ];
 
   const userNavItems = [
+    { name: 'Home', href: '/user-home' },
     { name: 'Learn Game', href: '/transplant-game' },
     { name: 'My Profile', href: '/profile' },
     { name: 'Resources', href: '/resources' }

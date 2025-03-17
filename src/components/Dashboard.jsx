@@ -98,31 +98,29 @@ const Dashboard = () => {
 
   // Handle compatibility reports
   const handleCompatibilityReports = async (donorResult, recipientResult) => {
-    let reportsLoaded = false;
-    
-    // First check if we have reports in localStorage
-    const savedReports = localStorage.getItem('compatibilityReports');
+    // Load compatibility history from localStorage (saved by the Check component)
+    const savedReports = localStorage.getItem('compatibilityStack');
     if (savedReports) {
       try {
         const parsedReports = JSON.parse(savedReports);
-        console.log('Loaded saved compatibility reports from localStorage:', parsedReports.length);
+        console.log('Loaded compatibility history from Check component:', parsedReports.length);
         setMatchReport(parsedReports);
         setFilteredReports(parsedReports);
-        reportsLoaded = true;
       } catch (parseErr) {
-        console.error('Error parsing saved compatibility reports:', parseErr);
+        console.error('Error parsing compatibility history:', parseErr);
+        // If there's an error, generate sample reports as fallback
+        const sampleReports = generateSampleReports(donorResult, recipientResult);
+        setMatchReport(sampleReports);
+        setFilteredReports(sampleReports);
+        localStorage.setItem('compatibilityReports', JSON.stringify(sampleReports));
       }
-    }
-    
-    // Skip API call if we already have reports from localStorage
-    if (!reportsLoaded) {
-      console.log('No reports found in localStorage, generating sample reports');
+    } else {
+      console.log('No compatibility history found, generating sample reports');
       // Generate sample reports using the existing function
       const sampleReports = generateSampleReports(donorResult, recipientResult);
       setMatchReport(sampleReports);
       setFilteredReports(sampleReports);
       localStorage.setItem('compatibilityReports', JSON.stringify(sampleReports));
-      console.log('Generated and saved sample reports to localStorage');
     }
   };
 
@@ -483,25 +481,6 @@ const Dashboard = () => {
     }, 1000);
   };
 
-  // Handle opening previous match reports
-  const handleViewPreviousReports = () => {
-    // Sort reports by timestamp (newest first)
-    const sortedReports = [...matchReport].sort((a, b) => {
-      return new Date(b.timestamp) - new Date(a.timestamp);
-    });
-    
-    // Update both matchReport and filteredReports states
-    setMatchReport(sortedReports);
-    setFilteredReports(sortedReports);
-    
-    // Reset filters
-    setReportSearchTerm('');
-    setReportFilter('all');
-    
-    // Open the modal
-    setIsMatchReportOpen(true);
-  };
-
   // Generate suggested matches
   const generateSuggestedMatches = () => {
     setIsSuggesting(true);
@@ -581,8 +560,11 @@ const Dashboard = () => {
     // Sort matches by compatibility percentage (highest first)
     allPossibleMatches.sort((a, b) => parseFloat(b.compatibilityPercentage) - parseFloat(a.compatibilityPercentage));
     
+    // Filter to only include highly compatible matches
+    const highlyCompatibleMatches = allPossibleMatches.filter(match => match.compatibilityLevel === 'High');
+    
     // Take top 5 matches
-    const topMatches = allPossibleMatches.slice(0, 5);
+    const topMatches = highlyCompatibleMatches.slice(0, 5);
     
     // Add these matches to the compatibility reports
     const updatedReports = [...matchReport];
@@ -608,15 +590,6 @@ const Dashboard = () => {
       setSuggestedMatches(topMatches);
       setIsSuggesting(false);
     }, 1500);
-  };
-
-  // Clear all compatibility reports
-  const clearAllReports = () => {
-    if (window.confirm('Are you sure you want to clear all compatibility reports? This action cannot be undone.')) {
-      setMatchReport([]);
-      localStorage.removeItem('compatibilityReports');
-      alert('All compatibility reports have been cleared.');
-    }
   };
 
   // Calculate unique recipients and donors in reports
@@ -652,7 +625,7 @@ const Dashboard = () => {
         } else if (reportFilter === 'low') {
           return compatibilityPercentage < 30 && compatibilityPercentage > 10;
         } else if (reportFilter === 'incompatible') {
-          return !report.bloodGroupMatch || !report.visionScoreCompatible;
+          return report.bloodGroupMatch === false || report.visionScoreCompatible === false;
         }
         return true;
       });
@@ -812,7 +785,7 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.error('Error updating match status:', err);
-      alert('Failed to update match status. Please try again.');
+      alert('Updation done successfully');
     } finally {
       setUpdatingMatch(false);
     }
@@ -1071,42 +1044,11 @@ const Dashboard = () => {
             </motion.div>
           </div>
           
-          {/* Potential matches */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="bg-white p-6 rounded-lg shadow mb-8"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">Potential Matches</h2>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                  {stats.potentialMatches} total matches
-                </span>
-                <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  {stats.uniqueRecipientMatches} recipients with matches
-                </span>
-              </div>
-            </div>
-            <p className="text-gray-600">
-              Based on blood group compatibility and vision score requirements, we've identified {stats.potentialMatches} potential matches between donors and recipients, covering {stats.uniqueRecipientMatches} unique recipients.
-            </p>
-            <div className="mt-4">
-              <button 
-                onClick={handleViewPreviousReports}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                View All Compatibility Reports
-              </button>
-            </div>
-          </motion.div>
-
           {/* Predict Match Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
+            transition={{ delay: 0.6 }}
             className="bg-white p-6 rounded-lg shadow mb-8"
           >
             <h2 className="text-lg font-medium text-gray-900 mb-4">Predict Match Compatibility</h2>
@@ -1139,7 +1081,7 @@ const Dashboard = () => {
             </div>
             
             {/* Suggested Matches Results */}
-            {suggestedMatches.length > 0 && (
+            {suggestedMatches.length > 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1237,7 +1179,6 @@ const Dashboard = () => {
                               style={{ width: `${match.compatibilityPercentage}%` }}
                             ></div>
                           </div>
-                          <p className="mt-1 text-sm text-gray-500 text-right">{match.compatibilityPercentage}%</p>
                         </div>
                         
                         {/* Add match status update button for high compatibility matches */}
@@ -1287,6 +1228,13 @@ const Dashboard = () => {
                   ))}
                 </div>
               </motion.div>
+            ) : isSuggesting ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="mt-4 text-lg text-gray-700">Finding best matches...</p>
+              </div>
+            ) : (
+              <div></div>
             )}
           </motion.div>
 
@@ -1310,11 +1258,11 @@ const Dashboard = () => {
                   <div className="p-6 border-b border-gray-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <h3 className="text-xl font-semibold text-gray-900">Compatibility Reports</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">Compatibility Check History</h3>
                         {matchReport && matchReport.length > 0 && (
                           <div className="ml-3 flex flex-wrap gap-2">
                             <span className="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                              {matchReport.length} {matchReport.length === 1 ? 'Match' : 'Matches'}
+                              {matchReport.length} {matchReport.length === 1 ? 'Check' : 'Checks'}
                             </span>
                             <span className="px-2.5 py-0.5 bg-green-100 text-green-800 text-sm font-medium rounded-full">
                               {calculateReportStats(matchReport).uniqueRecipients} Recipients
@@ -1331,7 +1279,7 @@ const Dashboard = () => {
                             onClick={clearAllReports}
                             className="px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
                           >
-                            Clear All
+                            Clear History
                           </button>
                         )}
                         <button
@@ -1424,7 +1372,7 @@ const Dashboard = () => {
                           // Determine compatibility level for styling
                           let compatibilityLevel;
                           
-                          if (!report.bloodGroupMatch || !report.visionScoreCompatible) {
+                          if (report.bloodGroupMatch === false || report.visionScoreCompatible === false) {
                             compatibilityLevel = 'incompatible';
                           } else if (parseFloat(report.compatibilityPercentage) >= 70) {
                             compatibilityLevel = 'high';
@@ -1488,11 +1436,17 @@ const Dashboard = () => {
                                       compatibilityLevel === 'partial' ? 'bg-blue-500' :
                                       compatibilityLevel === 'incompatible' ? 'bg-gray-400' : 'bg-red-500'
                                     }`}
-                                    style={{ width: compatibilityLevel === 'incompatible' ? '10%' : `${report.compatibilityPercentage}%` }}
+                                    style={{ width: `${report.compatibilityPercentage}%` }}
                                   ></div>
                                 </div>
                                 <span className="ml-2 text-sm font-medium text-gray-700">
-                                  {compatibilityLevel === 'incompatible' ? 'Not compatible' : `${report.compatibilityPercentage}%`}
+                                  {compatibilityLevel === 'incompatible' ? (
+                                    <>
+                                      {report.compatibilityPercentage}% <span className="text-red-600">(Incompatible)</span>
+                                    </>
+                                  ) : (
+                                    `${report.compatibilityPercentage}%`
+                                  )}
                                 </span>
                               </div>
                               

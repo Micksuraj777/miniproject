@@ -408,7 +408,7 @@ const UserProfile = () => {
                       profileData.status === 'Active' || profileData.status === 'Waiting' ? 'bg-yellow-100 text-yellow-800' : 
                       'bg-gray-100 text-gray-800'
                     }`}>
-                      {profileData.status || (isDonor ? 'Active' : 'Waiting')}
+                      {profileData.status || (isDonor ? 'Active' : 'Matched')}
                     </span>
                   </dd>
                 </div>

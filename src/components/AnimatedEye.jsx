@@ -1,6 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+// Create a shared animation key to synchronize all eye animations
+const sharedAnimationKey = "sharedEyeAnimation";
+
 const AnimatedEye = ({ size = 80 }) => {
   const eyeVariants = {
     initial: { scale: 0.8, opacity: 0 },
@@ -196,7 +199,7 @@ const AnimatedEye = ({ size = 80 }) => {
           />
         </motion.div>
         
-        {/* Upper eyelid with realistic animation */}
+        {/* Upper eyelid with synchronized animation using shared key */}
         <motion.div
           className="absolute inset-x-0 top-0 rounded-t-full bg-gradient-to-b from-white via-gray-50 to-gray-100"
           style={{ 
@@ -206,6 +209,7 @@ const AnimatedEye = ({ size = 80 }) => {
           }}
           variants={eyelidVariants}
           animate="animate"
+          key={sharedAnimationKey}
         >
           {/* Eyelid crease */}
           <div 

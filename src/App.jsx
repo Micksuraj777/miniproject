@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Tab } from '@headlessui/react';
 import Navbar from "./components/Navbar"
 import Home from "./components/home"
+import UserHome from "./components/UserHome"
 import Donor from "./components/Donor"
 import Receiver from "./components/Receiver"
 import Check from './components/check';
@@ -112,6 +113,7 @@ const CustomRedirect = () => {
 // AnimatedRoutes component to handle route transitions
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const { currentUser } = useAuth();
   
   return (
     <AnimatePresence mode="wait">
@@ -120,7 +122,7 @@ const AnimatedRoutes = () => {
         
         {/* Public routes */}
         <Route path="/" element={
-          <ProtectedRoute requiredRole="admin">
+          currentUser?.role === 'admin' ? (
             <motion.div
               key="home"
               variants={pageVariants}
@@ -131,10 +133,36 @@ const AnimatedRoutes = () => {
             >
               <Home />
             </motion.div>
-          </ProtectedRoute>
+          ) : (
+            <motion.div
+              key="user-home"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="page-container"
+            >
+              <UserHome />
+            </motion.div>
+          )
         } />
         
         {/* User routes */}
+        <Route path="/user-home" element={
+          <ProtectedRoute requiredRole="user">
+            <motion.div
+              key="user-home"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="page-container"
+            >
+              <UserHome />
+            </motion.div>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/profile" element={
           <ProtectedRoute requiredRole="user">
             <motion.div
@@ -822,7 +850,7 @@ Please feel free to ask me anything about these topics!`;
                   </div>
                 )}
                 <div ref={messagesEndRef} />
-        </div>
+              </div>
 
               {/* Chat Input */}
               <div className="p-4 border-t border-gray-200 bg-white">
@@ -857,8 +885,8 @@ Please feel free to ask me anything about these topics!`;
                       />
                     </svg>
                   </button>
-      </div>
-    </div>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         )}
