@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Button from './button';
 import { motion, AnimatePresence } from 'framer-motion';
+import UserProfileModal from './UserProfileModal';
+import { useNavigate } from 'react-router-dom';
 
 export function Tables() {
   const [isLoading, setIsLoading] = useState(true);
@@ -10,6 +12,9 @@ export function Tables() {
   const [searchTerm, setSearchTerm] = useState('');
   const [donors, setDonors] = useState([]);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDonorId, setSelectedDonorId] = useState(null);
+  const navigate = useNavigate();
   
   useEffect(() => {
     fetchDonors();
@@ -59,9 +64,25 @@ export function Tables() {
     setSortConfig({ key, direction });
   };
 
+  const handleRowClick = (donorId) => {
+    setSelectedRow(donorId);
+    setSelectedDonorId(donorId);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   const getVisionScoreColor = (score) => {
     if (score >= 8) return 'bg-green-100 text-green-800 ring-green-600/20';
     if (score >= 6) return 'bg-yellow-100 text-yellow-800 ring-yellow-600/20';
+    return 'bg-red-100 text-red-800 ring-red-600/20';
+  };
+
+  const getScoreColor = (score) => {
+    if (score >= 80) return 'bg-green-100 text-green-800 ring-green-600/20';
+    if (score >= 60) return 'bg-yellow-100 text-yellow-800 ring-yellow-600/20';
     return 'bg-red-100 text-red-800 ring-red-600/20';
   };
 
@@ -74,13 +95,7 @@ export function Tables() {
     .sort((a, b) => {
       if (sortConfig.key === null) return 0;
       
-      if (sortConfig.key === 'visionScore') {
-        return sortConfig.direction === 'asc' 
-          ? a[sortConfig.key] - b[sortConfig.key]
-          : b[sortConfig.key] - a[sortConfig.key];
-      }
-      
-      if (sortConfig.key === 'age') {
+      if (['visionScore', 'bloodMatchScore', 'hlaMatchScore', 'tissueQualityScore', 'age'].includes(sortConfig.key)) {
         return sortConfig.direction === 'asc' 
           ? a[sortConfig.key] - b[sortConfig.key]
           : b[sortConfig.key] - a[sortConfig.key];
@@ -102,12 +117,14 @@ export function Tables() {
           { key: 'bloodGroup', label: 'Blood Group' },
           { key: 'contact', label: 'Contact' },
           { key: 'address', label: 'Address' },
-          { key: 'visionScore', label: 'Vision Score' }
+          { key: 'visionScore', label: 'Vision Score' },
+          { key: 'hlaMatchScore', label: 'HLA Score' },
+          { key: 'tissueQualityScore', label: 'Tissue Quality Score' }
         ].map(({ key, label }) => (
           <th
             key={key}
             scope="col"
-            className="py-3.5 px-4 text-sm font-semibold text-left text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+            className={`py-3.5 px-4 text-sm font-semibold text-left text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors`}
             onClick={() => handleSort(key)}
           >
             <div className="flex items-center gap-x-2">
@@ -141,7 +158,7 @@ export function Tables() {
             className={`hover:bg-gray-50 transition-all cursor-pointer ${
               selectedRow === donor.id ? 'bg-blue-50' : ''
             }`}
-            onClick={() => setSelectedRow(donor.id)}
+            onClick={() => handleRowClick(donor.id)}
           >
             <td className="px-4 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
               {donor.id}
@@ -167,6 +184,16 @@ export function Tables() {
             <td className="px-4 py-4 text-sm whitespace-nowrap">
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${getVisionScoreColor(donor.visionScore)}`}>
                 {donor.visionScore}/10
+              </span>
+            </td>
+            <td className="px-4 py-4 text-sm whitespace-nowrap">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${getScoreColor(donor.hlaMatchScore)}`}>
+                {donor.hlaMatchScore}/10
+              </span>
+            </td>
+            <td className="px-4 py-4 text-sm whitespace-nowrap">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${getScoreColor(donor.tissueQualityScore)}`}>
+                {donor.tissueQualityScore}/10
               </span>
             </td>
           </motion.tr>
@@ -198,6 +225,15 @@ export function Tables() {
             <div className="h-4 bg-gray-200 rounded w-24"></div>
           </td>
           <td className="px-4 py-4">
+            <div className="h-4 bg-gray-200 rounded w-48"></div>
+          </td>
+          <td className="px-4 py-4">
+            <div className="h-4 bg-gray-200 rounded w-16"></div>
+          </td>
+          <td className="px-4 py-4">
+            <div className="h-4 bg-gray-200 rounded w-16"></div>
+          </td>
+          <td className="px-4 py-4">
             <div className="h-4 bg-gray-200 rounded w-16"></div>
           </td>
         </tr>
@@ -225,33 +261,46 @@ export function Tables() {
   return (
     <section className="w-full px-4 mx-auto h-screen">
       <div className="flex flex-col mt-6">
-        <div className="mb-4">
-          <div className="relative">
+        <div className="mb-4 flex justify-between items-center">
+          <div className="relative w-full max-w-md">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path>
+              </svg>
+            </div>
             <input
               type="text"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
               placeholder="Search donors..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
-            <svg
-              className="absolute right-3 top-2.5 h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          </div>
+          <div className="flex space-x-2">
+            <Button
+              onClick={() => navigate('/add-donor')}
+              className="bg-green-600 hover:bg-green-700 text-white"
+              text="Add Donor"
+            />
+            <Button
+              onClick={handleClick}
+              disabled={isLoading || visibleRows === donors.length}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              text={isLoading ? 'Loading...' : 'Show All'}
+            />
+            {visibleRows > 7 && (
+              <Button
+                onClick={handleShowLess}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800"
+                text="Show Less"
               />
-            </svg>
+            )}
           </div>
         </div>
+
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden border border-gray-200 md:rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div className="overflow-hidden border border-gray-200 md:rounded-lg">
               <table className="min-w-full divide-y divide-gray-200">
                 {renderTableHeader()}
                 {isLoading ? renderLoadingSkeleton() : renderTableBody()}
@@ -260,37 +309,13 @@ export function Tables() {
           </div>
         </div>
       </div>
-      <div className="w-full justify-center flex pt-6">
-        {visibleRows < filteredAndSortedData.length ? (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-        <Button
-          text="Show More"
-          onClick={handleClick}
-              color="bg-blue-500 hover:bg-blue-600"
-              size="py-2 px-6"
-              rounded="rounded-md"
-              loading={isLoading}
-            />
-          </motion.div>
-        ) : (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <Button
-              text="Show Less"
-              onClick={handleShowLess}
-              color="bg-red-500 hover:bg-red-600"
-          size="py-2 px-6"
-          rounded="rounded-md"
-          loading={isLoading}
-        />
-          </motion.div>
-        )}
-      </div>
+
+      <UserProfileModal 
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        userId={selectedDonorId}
+        userType="donor"
+      />
     </section>
   );
 }

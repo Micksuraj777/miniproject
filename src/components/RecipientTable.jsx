@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Button from './button';
 import { motion, AnimatePresence } from 'framer-motion';
+import UserProfileModal from './UserProfileModal';
+import { useNavigate } from 'react-router-dom';
 
 export function RecipientTable() {
   const [isLoading, setIsLoading] = useState(true);
@@ -10,6 +12,9 @@ export function RecipientTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [recipients, setRecipients] = useState([]);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRecipientId, setSelectedRecipientId] = useState(null);
+  const navigate = useNavigate();
   
   useEffect(() => {
     fetchRecipients();
@@ -57,6 +62,16 @@ export function RecipientTable() {
       direction = 'desc';
     }
     setSortConfig({ key, direction });
+  };
+
+  const handleRowClick = (recipientId) => {
+    setSelectedRow(recipientId);
+    setSelectedRecipientId(recipientId);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   const getScoreColor = (score) => {
@@ -110,15 +125,13 @@ export function RecipientTable() {
           { key: 'address', label: 'Address' },
           { key: 'bloodGroup', label: 'Blood Group' },
           { key: 'visionScore', label: 'Vision Score' },
-          { key: 'bloodMatchScore', label: 'Blood Match' },
           { key: 'hlaMatchScore', label: 'HLA Match' },
-          { key: 'tissueQualityScore', label: 'Tissue Quality' },
           { key: 'recipientUrgencyScore', label: 'Urgency' }
         ].map(({ key, label }) => (
           <th
             key={key}
             scope="col"
-            className="py-3.5 px-4 text-sm font-semibold text-left text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+            className={`py-3.5 px-4 text-sm font-semibold text-left text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors`}
             onClick={() => handleSort(key)}
           >
             <div className="flex items-center gap-x-2">
@@ -152,7 +165,7 @@ export function RecipientTable() {
             className={`hover:bg-gray-50 transition-all cursor-pointer ${
               selectedRow === recipient.id ? 'bg-blue-50' : ''
             }`}
-            onClick={() => setSelectedRow(recipient.id)}
+            onClick={() => handleRowClick(recipient.id)}
           >
             <td className="px-4 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
               {recipient.id}
@@ -161,13 +174,13 @@ export function RecipientTable() {
               {recipient.name}
             </td>
             <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
-              {recipient.gender}
+              {recipient.contact}
             </td>
             <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
               {recipient.age}
             </td>
             <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
-              {recipient.contact}
+              {recipient.gender}
             </td>
             <td className="px-4 py-4 text-sm text-gray-500">
               {recipient.address}
@@ -181,18 +194,8 @@ export function RecipientTable() {
               </span>
             </td>
             <td className="px-4 py-4 text-sm whitespace-nowrap">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${getScoreColor(recipient.bloodMatchScore)}`}>
-                {recipient.bloodMatchScore}/10
-              </span>
-            </td>
-            <td className="px-4 py-4 text-sm whitespace-nowrap">
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${getScoreColor(recipient.hlaMatchScore)}`}>
                 {recipient.hlaMatchScore}/10
-              </span>
-            </td>
-            <td className="px-4 py-4 text-sm whitespace-nowrap">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset ${getScoreColor(recipient.tissueQualityScore)}`}>
-                {recipient.tissueQualityScore}/10
               </span>
             </td>
             <td className="px-4 py-4 text-sm whitespace-nowrap">
@@ -240,9 +243,6 @@ export function RecipientTable() {
           <td className="px-4 py-4">
             <div className="h-4 bg-gray-200 rounded w-16"></div>
           </td>
-          <td className="px-4 py-4">
-            <div className="h-4 bg-gray-200 rounded w-16"></div>
-          </td>
         </tr>
       ))}
     </tbody>
@@ -268,33 +268,46 @@ export function RecipientTable() {
   return (
     <section className="w-full px-4 mx-auto h-screen">
       <div className="flex flex-col mt-6">
-        <div className="mb-4">
-          <div className="relative">
+        <div className="mb-4 flex justify-between items-center">
+          <div className="relative w-full max-w-md">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path>
+              </svg>
+            </div>
             <input
               type="text"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
               placeholder="Search recipients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
-            <svg
-              className="absolute right-3 top-2.5 h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          </div>
+          <div className="flex space-x-2">
+            <Button
+              onClick={() => navigate('/add-recipient')}
+              className="bg-green-600 hover:bg-green-700 text-white"
+              text="Add Recipient"
+            />
+            <Button
+              onClick={handleClick}
+              disabled={isLoading || visibleRows === recipients.length}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              text={isLoading ? 'Loading...' : 'Show All'}
+            />
+            {visibleRows > 7 && (
+              <Button
+                onClick={handleShowLess}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800"
+                text="Show Less"
               />
-            </svg>
+            )}
           </div>
         </div>
+
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden border border-gray-200 md:rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div className="overflow-hidden border border-gray-200 md:rounded-lg">
               <table className="min-w-full divide-y divide-gray-200">
                 {renderTableHeader()}
                 {isLoading ? renderLoadingSkeleton() : renderTableBody()}
@@ -303,37 +316,13 @@ export function RecipientTable() {
           </div>
         </div>
       </div>
-      <div className="w-full justify-center flex pt-6">
-        {visibleRows < filteredAndSortedData.length ? (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <Button
-              text="Show More"
-              onClick={handleClick}
-              color="bg-blue-500 hover:bg-blue-600"
-              size="py-2 px-6"
-              rounded="rounded-md"
-              loading={isLoading}
-            />
-          </motion.div>
-        ) : (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <Button
-              text="Show Less"
-              onClick={handleShowLess}
-              color="bg-red-500 hover:bg-red-600"
-              size="py-2 px-6"
-              rounded="rounded-md"
-              loading={isLoading}
-            />
-          </motion.div>
-        )}
-      </div>
+
+      <UserProfileModal 
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        userId={selectedRecipientId}
+        userType="recipient"
+      />
     </section>
   );
 } 

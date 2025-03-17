@@ -4,6 +4,52 @@ import Button from './button';
 import { Tables } from './table';
 import { RecipientTable } from './RecipientTable';
 
+// Add stack implementation at the top after imports
+class CompatibilityStack {
+  constructor() {
+    this.items = [];
+    this.maxSize = 50; // Maximum size of the stack
+  }
+
+  push(item) {
+    if (this.items.length >= this.maxSize) {
+      this.items.pop(); // Remove oldest item if stack is full
+    }
+    this.items.unshift(item); // Add new item to the front
+    this.saveToLocalStorage();
+  }
+
+  pop() {
+    const item = this.items.shift();
+    this.saveToLocalStorage();
+    return item;
+  }
+
+  peek() {
+    return this.items[0];
+  }
+
+  getAll() {
+    return [...this.items];
+  }
+
+  clear() {
+    this.items = [];
+    this.saveToLocalStorage();
+  }
+
+  saveToLocalStorage() {
+    localStorage.setItem('compatibilityStack', JSON.stringify(this.items));
+  }
+
+  loadFromLocalStorage() {
+    const saved = localStorage.getItem('compatibilityStack');
+    if (saved) {
+      this.items = JSON.parse(saved);
+    }
+  }
+}
+
 function Check() {
     // State for form inputs
     const [donorSearch, setDonorSearch] = useState('');
@@ -27,6 +73,13 @@ function Check() {
     // State for validation
     const [validationResult, setValidationResult] = useState(null);
     const [validating, setValidating] = useState(false);
+    
+    // Add stack state
+    const [compatibilityStack] = useState(() => {
+        const stack = new CompatibilityStack();
+        stack.loadFromLocalStorage();
+        return stack;
+    });
     
     // Animation variants
     const containerVariants = {
@@ -199,11 +252,11 @@ function Check() {
             }
             
             // Step 2: Check vision score compatibility
-            if (donorData.visionScore <= recipientData.visionScore) {
+            if (donorData.visionScore < recipientData.visionScore) {
                 setValidationResult({
                     isCompatible: false,
                     stage: 'visionScore',
-                    message: 'Donor vision score must be greater than recipient vision score',
+                    message: 'Donor vision score must be greater than or equal to recipient vision score',
                     details: {
                         donorVisionScore: donorData.visionScore,
                         recipientVisionScore: recipientData.visionScore
@@ -223,10 +276,8 @@ function Check() {
                 successRate: 0
             });
             
-            // Simulate calculation steps with delays - using ONLY recipient data
-            
-            // Blood Match Score - based on exact match
-            const bloodMatchScore = recipientData.bloodMatchScore;
+            // Blood Match Score - 10/10 since blood groups match
+            const bloodMatchScore = 10; // Perfect score since blood groups match
             await new Promise(resolve => setTimeout(resolve, 500));
             setValidationResult(prev => ({
                 ...prev,
@@ -234,26 +285,26 @@ function Check() {
                 scores: { ...prev.scores, bloodMatchScore }
             }));
             
-            // Vision Score - using recipient's data
-            const visionScore = recipientData.visionScore;
+            // Vision Score - calculate average of donor and recipient vision scores
+            const visionScore = (parseFloat(donorData.visionScore) + parseFloat(recipientData.visionScore)) / 2;
             await new Promise(resolve => setTimeout(resolve, 500));
             setValidationResult(prev => ({
                 ...prev,
                 calculationProgress: 40,
-                scores: { ...prev.scores, visionScore }
+                scores: { ...prev.scores, visionScore: parseFloat(visionScore.toFixed(1)) }
             }));
             
-            // HLA Match Score - directly from recipient data
-            const hlaMatchScore = recipientData.hlaMatchScore;
+            // HLA Match Score - calculate average of donor and recipient HLA scores
+            const hlaMatchScore = (parseFloat(donorData.hlaMatchScore) + parseFloat(recipientData.hlaMatchScore)) / 2;
             await new Promise(resolve => setTimeout(resolve, 500));
             setValidationResult(prev => ({
                 ...prev,
                 calculationProgress: 60,
-                scores: { ...prev.scores, hlaMatchScore }
+                scores: { ...prev.scores, hlaMatchScore: parseFloat(hlaMatchScore.toFixed(1)) }
             }));
             
-            // Tissue Quality Score - directly from recipient data
-            const tissueQualityScore = recipientData.tissueQualityScore;
+            // Tissue Quality Score - take exact score from donor
+            const tissueQualityScore = donorData.tissueQualityScore;
             await new Promise(resolve => setTimeout(resolve, 500));
             setValidationResult(prev => ({
                 ...prev,
@@ -261,7 +312,7 @@ function Check() {
                 scores: { ...prev.scores, tissueQualityScore }
             }));
             
-            // Recipient Urgency Score - directly from recipient data
+            // Recipient Urgency Score - take exact score from recipient
             const recipientUrgencyScore = recipientData.recipientUrgencyScore;
             await new Promise(resolve => setTimeout(resolve, 500));
             setValidationResult(prev => ({
@@ -270,7 +321,7 @@ function Check() {
                 scores: { ...prev.scores, recipientUrgencyScore }
             }));
             
-            // Calculate total score using only recipient data
+            // Calculate total score
             const totalScore = bloodMatchScore + visionScore + hlaMatchScore + tissueQualityScore + recipientUrgencyScore;
             
             // Calculate success rate as a percentage
@@ -290,12 +341,28 @@ function Check() {
                 successRate: successRate.toFixed(1),
                 scores: {
                     bloodMatchScore,
-                    visionScore,
-                    hlaMatchScore,
+                    visionScore: parseFloat(visionScore.toFixed(1)),
+                    hlaMatchScore: parseFloat(hlaMatchScore.toFixed(1)),
                     tissueQualityScore,
                     recipientUrgencyScore
                 }
             });
+
+            // When validation is complete, add result to stack
+            const stackItem = {
+                ...validationResult,
+                donor: donorData,
+                recipient: recipientData,
+                timestamp: new Date().toISOString(),
+                id: `check-${Date.now()}`
+            };
+            compatibilityStack.push(stackItem);
+            
+            // Update dashboard's matchReport state through localStorage
+            const currentReports = JSON.parse(localStorage.getItem('compatibilityReports') || '[]');
+            currentReports.unshift(stackItem);
+            localStorage.setItem('compatibilityReports', JSON.stringify(currentReports));
+
         } catch (error) {
             console.error("Validation error:", error);
             setValidationResult({
@@ -543,7 +610,7 @@ function Check() {
                                     <div className="font-medium">{recipientData.age}</div>
                                     
                                     <div className="text-gray-600">Gender:</div>
-                                    <div className="font-medium">{recipientData.contact}</div>
+                                    <div className="font-medium">{recipientData.gender}</div>
                                     
                                     <div className="text-gray-600">Blood Group:</div>
                                     <div className="font-medium">{recipientData.bloodGroup}</div>
@@ -658,7 +725,7 @@ function Check() {
                                             </div>
                                             
                                             <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Vision Score:</span>
+                                                <span className="text-gray-600">Vision Score :</span>
                                                 {'visionScore' in validationResult.scores ? (
                                                     <motion.span 
                                                         initial={{ opacity: 0, y: 10 }}
@@ -673,7 +740,7 @@ function Check() {
                                             </div>
                                             
                                             <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">HLA Match Score:</span>
+                                                <span className="text-gray-600">HLA Match Score :</span>
                                                 {'hlaMatchScore' in validationResult.scores ? (
                                                     <motion.span 
                                                         initial={{ opacity: 0, y: 10 }}
@@ -794,11 +861,11 @@ function Check() {
                                                     <span className="font-medium">{validationResult.scores.bloodMatchScore}/10</span>
                                                 </div>
                                                 <div className="flex justify-between">
-                                                    <span>Vision Score:</span>
+                                                    <span>Vision Score :</span>
                                                     <span className="font-medium">{validationResult.scores.visionScore.toFixed(1)}/10</span>
                                                 </div>
                                                 <div className="flex justify-between">
-                                                    <span>HLA Match Score:</span>
+                                                    <span>HLA Match Score :</span>
                                                     <span className="font-medium">{validationResult.scores.hlaMatchScore}/10</span>
                                                 </div>
                                                 <div className="flex justify-between">
@@ -812,6 +879,43 @@ function Check() {
                                                 <div className="border-t pt-2 mt-2 flex justify-between font-semibold">
                                                     <span>Total Score:</span>
                                                     <span>{validationResult.totalScore}/50</span>
+                                                </div>
+                                            </div>
+                                            <div className="mt-3 text-xs text-gray-500">
+                                                <p>* Vision Score and HLA Match Score are calculated as averages of donor and recipient values.</p>
+                                                <p>* Total score must be at least 25/50 for compatibility.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Individual Scores */}
+                                        <div className="bg-gray-50 p-4 rounded-lg mt-4">
+                                            <h4 className="font-medium text-gray-700 mb-3">Individual Scores</h4>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <h5 className="font-medium text-sm text-gray-600 mb-2">Donor</h5>
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between text-sm">
+                                                            <span>Vision Score:</span>
+                                                            <span>{donorData.visionScore}/10</span>
+                                                        </div>
+                                                        <div className="flex justify-between text-sm">
+                                                            <span>HLA Match Score:</span>
+                                                            <span>{donorData.hlaMatchScore}/10</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h5 className="font-medium text-sm text-gray-600 mb-2">Recipient</h5>
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between text-sm">
+                                                            <span>Vision Score:</span>
+                                                            <span>{recipientData.visionScore}/10</span>
+                                                        </div>
+                                                        <div className="flex justify-between text-sm">
+                                                            <span>HLA Match Score:</span>
+                                                            <span>{recipientData.hlaMatchScore}/10</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

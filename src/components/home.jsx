@@ -1,11 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { isSignedIn } = useAuth();
+  const { currentUser } = useAuth();
+  const isSignedIn = !!currentUser;
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -23,7 +24,11 @@ const Home = () => {
 
   const handleGetStarted = () => {
     if (isSignedIn) {
-      navigate('/dashboard');
+      if (currentUser.role === 'admin') {
+        navigate('/dashboard');
+      } else {
+        navigate('/profile');
+      }
     } else {
       navigate('/auth');
     }
@@ -81,7 +86,7 @@ const Home = () => {
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Eye Tissue Management Platform
-            </h1>
+      </h1>
             <p className="text-xl md:text-2xl mb-8">
               Streamlining the process of eye tissue donation and transplantation
             </p>
@@ -194,17 +199,24 @@ const Home = () => {
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-          >
+          ><div className='flex justify-center items-center gap-4'>
             <Link
-              to={isSignedIn ? "/donor" : "/auth"}
+              to={isSignedIn ? "/add-donor" : "/auth"}
               className="bg-white text-blue-600 px-8 py-3 rounded-full font-semibold hover:bg-blue-50 transition-colors"
             >
-              {isSignedIn ? 'Go to Dashboard' : 'Become a Donor'}
+              {isSignedIn ? 'Add Donor' : 'Go to Dashboard'}
             </Link>
+            <Link
+              to={isSignedIn ? "/add-recipient" : "/auth"}
+              className="bg-white text-blue-600 px-8 py-3 rounded-full font-semibold hover:bg-blue-50 transition-colors"
+            >
+              {isSignedIn ? 'Add Recipient' : 'Go to Dashboard'}
+            </Link>
+          </div>
           </motion.div>
         </div>
       </motion.div>
-    </div>
+      </div>
   );
 };
 
