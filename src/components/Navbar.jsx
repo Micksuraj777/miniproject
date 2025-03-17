@@ -17,14 +17,16 @@ const Navbar = () => {
     { name: 'Dashboard', href: '/dashboard' },
     { name: 'Donor Details', href: '/donor' },
     { name: 'Recipient Details', href: '/receiver' },
-    { name: 'Check Compatibility', href: '/check' }
+    { name: 'Check Compatibility', href: '/check' },
+    { name: 'Feedback', href: '/feedback-management' }
   ];
 
   const userNavItems = [
     { name: 'Home', href: '/user-home' },
     { name: 'Learn Game', href: '/transplant-game' },
     { name: 'My Profile', href: '/profile' },
-    { name: 'Resources', href: '/resources' }
+    { name: 'Resources', href: '/resources' },
+    { name: 'Feedback', href: '/feedback' }
   ];
 
   const navItems = currentUser?.role === 'admin' ? adminNavItems : userNavItems;

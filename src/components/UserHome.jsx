@@ -11,6 +11,7 @@ const UserHome = () => {
   const controls = useAnimation();
   const { scrollYProgress } = useScroll();
   const [selectedPolicy, setSelectedPolicy] = useState(null);
+  const [greeting, setGreeting] = useState('Welcome');
   
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
@@ -21,6 +22,16 @@ const UserHome = () => {
       y: 0,
       transition: { duration: 0.8, ease: "easeOut" }
     });
+    
+    // Set time-based greeting
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      setGreeting('Good morning');
+    } else if (hour >= 12 && hour < 18) {
+      setGreeting('Good afternoon');
+    } else {
+      setGreeting('Good evening');
+    }
   }, [controls]);
 
   const fadeInUp = {
@@ -145,113 +156,362 @@ const UserHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Section with Parallax Effect */}
-      <motion.div 
-        style={{ opacity, scale }}
-        className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-r from-blue-900 via-blue-700 to-blue-800"
-      >
-        <div className="absolute inset-0 bg-blue-900 opacity-30"></div>
-        
-        {/* Animated Background Elements */}
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* Hero Section */}
+      <section className="relative py-20 overflow-hidden bg-gradient-to-b from-blue-50 via-indigo-50 to-white">
+        {/* Background 3D elements */}
         <div className="absolute inset-0 overflow-hidden">
-          {[...Array(20)].map((_, i) => (
+          {[...Array(6)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute rounded-full bg-white"
+              className="absolute rounded-full bg-gradient-to-br from-blue-400/10 to-indigo-500/10"
               style={{
-                width: Math.random() * 8 + 2 + 'px',
-                height: Math.random() * 8 + 2 + 'px',
+                width: Math.random() * 300 + 100 + 'px',
+                height: Math.random() * 300 + 100 + 'px',
                 left: Math.random() * 100 + '%',
                 top: Math.random() * 100 + '%',
-                opacity: Math.random() * 0.5 + 0.1
+                filter: 'blur(40px)',
+                zIndex: 0
               }}
               animate={{
-                y: [0, -100],
-                opacity: [0, 0.5, 0]
+                x: [0, Math.random() * 50 - 25],
+                y: [0, Math.random() * 50 - 25],
+                scale: [1, 1.1, 0.9, 1],
+                rotate: [0, Math.random() * 10 - 5]
               }}
               transition={{
-                duration: Math.random() * 10 + 10,
+                duration: 15 + Math.random() * 10,
                 repeat: Infinity,
-                delay: Math.random() * 5
+                repeatType: "reverse",
+                ease: "easeInOut"
               }}
             />
           ))}
         </div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={controls}
-            className="text-center text-white"
-          >
-            <motion.div 
-              className="flex justify-center mb-8 gap-4"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
+          <div className="flex flex-col lg:flex-row items-center">
+            <div className="lg:w-1/2 mb-10 lg:mb-0">
               <motion.div
-                animate={{ 
-                  scale: [1, 1.05, 1],
-                  rotate: [0, 2, 0, -2, 0]
-                }}
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ 
-                  duration: 3, 
-                  repeat: Infinity,
-                  repeatType: "mirror"
+                  duration: 0.7, 
+                  ease: [0.22, 1, 0.36, 1] 
                 }}
+                className="text-center lg:text-left"
               >
-                <AnimatedEye size={120} />
+                {currentUser && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                  >
+                    <motion.p
+                      className="text-xl md:text-2xl text-blue-600 font-medium mb-2"
+                      animate={{ 
+                        color: ['#3b82f6', '#6366f1', '#8b5cf6', '#3b82f6'],
+                        textShadow: ['0 0 5px rgba(59, 130, 246, 0.3)', '0 0 10px rgba(99, 102, 241, 0.4)', '0 0 5px rgba(139, 92, 246, 0.3)', '0 0 5px rgba(59, 130, 246, 0.3)']
+                      }}
+                      transition={{ 
+                        duration: 8, 
+                        repeat: Infinity,
+                        repeatType: "reverse" 
+                      }}
+                    >
+                      {greeting}, {currentUser.displayName || currentUser.email?.split('@')[0] || 'Friend'}!
+                    </motion.p>
+                  </motion.div>
+                )}
+                <motion.h1 
+                  className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.1 }}
+                >
+                  <span className="inline-block">
+                    <motion.span
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                      className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600"
+                    >
+                      Restoring
+                    </motion.span>
+                  </span>{" "}
+                  <span className="inline-block">
+                    <motion.span
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className="inline-block"
+                    >
+                      Vision
+                    </motion.span>
+                  </span>{" "}
+                  <span className="inline-block">
+                    <motion.span
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.4 }}
+                      className="inline-block"
+                    >
+                      Through
+                    </motion.span>
+                  </span>{" "}
+                  <span className="inline-block">
+                    <motion.span
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.5 }}
+                      className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
+                    >
+                      Corneal
+                    </motion.span>
+                  </span>{" "}
+                  <span className="inline-block">
+                    <motion.span
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.6 }}
+                      className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600"
+                    >
+                      Transplantation
+                    </motion.span>
+                  </span>
+                </motion.h1>
+                <motion.p 
+                  className="text-lg md:text-xl text-gray-600 mb-8"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.4 }}
+                >
+                  Join our mission to bring the gift of sight to those in need through innovative corneal transplant procedures.
+                </motion.p>
+                <motion.div 
+                  className="flex flex-wrap justify-center lg:justify-start gap-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.5 }}
+                >
+                  <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.4)" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all"
+                    onClick={() => navigate('/profile')}
+                    style={{ 
+                      boxShadow: "0 4px 14px -3px rgba(59, 130, 246, 0.3)",
+                      transform: "perspective(1000px)" 
+                    }}
+                  >
+                    My Profile
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(99, 102, 241, 0.4)" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium rounded-lg shadow-lg hover:from-indigo-700 hover:to-indigo-800 transition-all"
+                    onClick={() => navigate('/transplant-game')}
+                    style={{ 
+                      boxShadow: "0 4px 14px -3px rgba(99, 102, 241, 0.3)",
+                      transform: "perspective(1000px)" 
+                    }}
+                  >
+                    Learn with Game
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.4)" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-medium rounded-lg shadow-lg hover:from-green-700 hover:to-green-800 transition-all"
+                    onClick={() => navigate('/feedback')}
+                    style={{ 
+                      boxShadow: "0 4px 14px -3px rgba(16, 185, 129, 0.3)",
+                      transform: "perspective(1000px)" 
+                    }}
+                  >
+                    Share Feedback
+                  </motion.button>
+                </motion.div>
               </motion.div>
+            </div>
+
+            <div className="lg:w-1/2 relative">
               <motion.div
-                animate={{ 
-                  scale: [1, 1.05, 1],
-                  rotate: [0, -2, 0, 2, 0]
-                }}
+                initial={{ opacity: 0, y: 30, rotateY: -15 }}
+                animate={{ opacity: 1, y: 0, rotateY: 0 }}
                 transition={{ 
-                  duration: 3, 
-                  repeat: Infinity,
-                  repeatType: "mirror",
-                  delay: 0.5
+                  duration: 0.8, 
+                  delay: 0.3,
+                  ease: [0.22, 1, 0.36, 1]
+                }}
+                className="relative z-10"
+                style={{ 
+                  transformStyle: "preserve-3d",
+                  perspective: "1000px"
                 }}
               >
-                <AnimatedEye size={120} />
+                <motion.div 
+                  className="relative bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl overflow-hidden shadow-2xl"
+                  style={{ 
+                    transformStyle: "preserve-3d",
+                    transform: "perspective(1000px) rotateX(5deg) rotateY(-5deg)",
+                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+                  }}
+                  whileHover={{ 
+                    rotateY: 0,
+                    rotateX: 0,
+                    transition: { duration: 0.4 }
+                  }}
+                >
+                  <div className="aspect-w-4 aspect-h-3 bg-gradient-to-br from-blue-500 via-indigo-500 to-blue-700">
+                    {/* 3D depth elements */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/20"></div>
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-400/10 via-transparent to-transparent"></div>
+                    
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <motion.div 
+                        className="relative w-40 h-40 md:w-72 md:h-72"
+                        animate={{ 
+                          rotateY: [0, 10, 0, -10, 0],
+                          rotateX: [0, 5, 0, -5, 0],
+                          z: [0, 10, 0, -10, 0]
+                        }}
+                        transition={{ 
+                          duration: 10, 
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                        style={{ transformStyle: "preserve-3d" }}
+                      >
+                        <AnimatedEye size={200} />
+                        <motion.div
+                          className="absolute top-0 left-0 w-full h-full rounded-full"
+                          animate={{
+                            boxShadow: [
+                              "0 0 30px 15px rgba(59, 130, 246, 0.4)",
+                              "0 0 60px 30px rgba(99, 102, 241, 0.6)",
+                              "0 0 30px 15px rgba(59, 130, 246, 0.4)"
+                            ],
+                            scale: [1, 1.1, 1]
+                          }}
+                          transition={{
+                            duration: 4,
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                          }}
+                        />
+                      </motion.div>
+                    </div>
+                    
+                    {/* Enhanced 3D particles */}
+                    <div className="absolute inset-0 overflow-hidden">
+                      {[...Array(40)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="absolute rounded-full bg-white"
+                          style={{
+                            width: Math.random() * 8 + 2 + 'px',
+                            height: Math.random() * 8 + 2 + 'px',
+                            left: Math.random() * 100 + '%',
+                            top: Math.random() * 100 + '%',
+                            opacity: Math.random() * 0.6 + 0.4,
+                            zIndex: Math.floor(Math.random() * 10),
+                            filter: `blur(${Math.random() * 1}px)`
+                          }}
+                          animate={{
+                            y: [0, -Math.random() * 150 - 50],
+                            x: [0, (Math.random() - 0.5) * 100],
+                            z: [0, Math.random() * 50],
+                            opacity: [0.8, 0],
+                            scale: [1, Math.random() * 0.5 + 0.5]
+                          }}
+                          transition={{
+                            duration: Math.random() * 5 + 3,
+                            repeat: Infinity,
+                            delay: Math.random() * 2,
+                            ease: "easeOut"
+                          }}
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* Reflective surface */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-600/30 to-transparent mix-blend-overlay"></div>
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent mix-blend-overlay"></div>
+                  </div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-              Vision Restoration Journey
-            </h1>
-            
-            <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto leading-relaxed">
-              Your comprehensive guide to eye tissue transplantation, recovery, and renewed vision
-            </p>
-            
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <button
-                onClick={handleGetStarted}
-                className="bg-white text-blue-700 px-10 py-4 rounded-full font-semibold text-lg hover:bg-blue-50 transition-colors shadow-lg"
+              
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+                className="absolute -bottom-10 -right-10 bg-white rounded-2xl p-6 shadow-xl z-20"
+                style={{ 
+                  transformStyle: "preserve-3d",
+                  transform: "perspective(1000px) rotateX(-5deg) rotateY(5deg)",
+                  boxShadow: "0 15px 30px -10px rgba(0, 0, 0, 0.2)"
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  rotateX: 0,
+                  rotateY: 0,
+                  transition: { duration: 0.3 }
+                }}
               >
-                Begin Your Journey
-              </button>
-            </motion.div>
-          </motion.div>
+                <div className="flex items-center">
+                  <div className="bg-gradient-to-br from-green-100 to-green-200 p-3 rounded-full mr-4 shadow-inner">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Success Rate</p>
+                    <motion.p 
+                      className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-teal-600"
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1, duration: 0.5 }}
+                    >
+                      98%
+                    </motion.p>
+                  </div>
+                </div>
+              </motion.div>
+              
+              {/* 3D decorative elements */}
+              <div className="absolute -top-20 -left-20 w-60 h-60 bg-blue-100 rounded-full opacity-70 filter blur-3xl"></div>
+              <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-indigo-100 rounded-full opacity-70 filter blur-3xl"></div>
+              <motion.div 
+                className="absolute top-1/4 right-1/4 w-20 h-20 bg-blue-400 rounded-full opacity-20"
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [0.2, 0.3, 0.2],
+                  filter: ["blur(20px)", "blur(30px)", "blur(20px)"]
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+              ></motion.div>
+              <motion.div 
+                className="absolute bottom-1/3 left-1/3 w-16 h-16 bg-indigo-500 rounded-full opacity-20"
+                animate={{
+                  scale: [1, 1.3, 1],
+                  opacity: [0.2, 0.4, 0.2],
+                  filter: ["blur(15px)", "blur(25px)", "blur(15px)"]
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  delay: 1
+                }}
+              ></motion.div>
+            </div>
+          </div>
         </div>
-        
-        <motion.div 
-          className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <svg className="w-10 h-10 text-white opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
-        </motion.div>
-      </motion.div>
+      </section>
 
       {/* Transplantation Process Section */}
       <motion.div
@@ -537,7 +797,7 @@ const UserHome = () => {
                         </svg>
                       ) : (
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                       )}
                     </div>
@@ -804,6 +1064,145 @@ const UserHome = () => {
           </motion.div>
         </div>
       </motion.div>
+
+      {/* Footer Section */}
+      <footer className="bg-gradient-to-r from-gray-900 to-blue-900 text-white py-12 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute rounded-full bg-blue-500 opacity-10"
+              style={{
+                width: Math.random() * 300 + 50 + 'px',
+                height: Math.random() * 300 + 50 + 'px',
+                left: Math.random() * 100 + '%',
+                top: Math.random() * 100 + '%',
+              }}
+              animate={{
+                x: [0, Math.random() * 50 - 25],
+                y: [0, Math.random() * 50 - 25],
+              }}
+              transition={{
+                duration: Math.random() * 10 + 15,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut"
+              }}
+            />
+          ))}
+        </div>
+        
+        {/* Back to top button */}
+        <motion.div 
+          className="absolute top-0 right-8 transform -translate-y-1/2 cursor-pointer"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          <div className="bg-blue-600 p-3 rounded-full shadow-lg">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7H3" />
+            </svg>
+          </div>
+        </motion.div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-700">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h3 className="text-2xl font-bold mb-4 flex items-center">
+                <span className="bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center mr-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </span>
+                Vision Restoration Center
+              </h3>
+              <p className="text-gray-400 mb-4">Your partner in eye health and vision care</p>
+              <div className="flex space-x-4">
+                {['facebook', 'twitter', 'instagram', 'linkedin'].map((social) => (
+                  <motion.a 
+                    key={social} 
+                    href="#" 
+                    className="bg-gray-800 w-10 h-10 rounded-full flex items-center justify-center text-blue-400 hover:bg-blue-600 hover:text-white transition-colors"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      {social === 'facebook' && <path d="M18.77,7.46H14.5v-1.9c0-.9.6-1.1,1-1.1h3V.5L14.84.5C10.41.5,9.4,3.3,9.4,5.3V7.46H5v4h4.4V20h5.1V11.46h3.77Z" />}
+                      {social === 'twitter' && <path d="M23.32,6.44a.5.5,0,0,0-.2-.87l-.79-.19A.49.49,0,0,1,22,4.89L21.74,4a.5.5,0,0,0-.58-.18l-1.33.41a.5.5,0,0,1-.52-.13A5.05,5.05,0,0,0,15.5,2,5,5,0,0,0,10,7a5.44,5.44,0,0,0,.11,1.07A.5.5,0,0,1,9.73,8.5,12.5,12.5,0,0,1,2.5,4.25a.5.5,0,0,0-.5,0A5,5,0,0,0,3,13a.5.5,0,0,1,.5.8,2.5,2.5,0,0,1-.5.16.5.5,0,0,0-.16.89A5,5,0,0,0,8,15a.51.51,0,0,1,.5.48,5,5,0,0,1-3,1.87.5.5,0,0,0,0,.9A12.44,12.44,0,0,0,12,20a12.5,12.5,0,0,0,12.5-12.5.5.5,0,0,0-.18-.38Z" />}
+                      {social === 'instagram' && <path d="M12,2.16c3.2,0,3.58,0,4.85.07,3.25.15,4.77,1.69,4.92,4.92.06,1.27.07,1.65.07,4.85s0,3.59-.07,4.85c-.15,3.23-1.66,4.77-4.92,4.92-1.27.06-1.64.07-4.85.07s-3.58,0-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.64-.07-4.85s0-3.58.07-4.85C2.38,3.92,3.9,2.38,7.15,2.23,8.42,2.18,8.8,2.16,12,2.16ZM12,0C8.74,0,8.33,0,7.05.07c-4.35.2-6.78,2.62-7,7C0,8.33,0,8.74,0,12S0,15.67.07,17c.2,4.36,2.62,6.78,7,7C8.33,24,8.74,24,12,24s3.67,0,4.95-.07c4.35-.2,6.78-2.62,7-7C24,15.67,24,15.26,24,12s0-3.67-.07-4.95c-.2-4.35-2.62-6.78-7-7C15.67,0,15.26,0,12,0Zm0,5.84A6.16,6.16,0,1,0,18.16,12,6.16,6.16,0,0,0,12,5.84ZM12,16a4,4,0,1,1,4-4A4,4,0,0,1,12,16ZM18.41,4.15a1.44,1.44,0,1,0,1.43,1.44A1.44,1.44,0,0,0,18.41,4.15Z" />}
+                      {social === 'linkedin' && <path d="M19,3a2,2,0,0,1,2,2V19a2,2,0,0,1-2,2H5a2,2,0,0,1-2-2V5A2,2,0,0,1,5,3H19m0-2H5A4,4,0,0,0,1,5V19a4,4,0,0,0,4,4H19a4,4,0,0,0,4-4V5a4,4,0,0,0-4-4ZM7,10h2v8H7ZM8,8.13A1.13,1.13,0,1,1,9.13,7,1.13,1.13,0,0,1,8,8.13ZM18,15.5c0-1.06-.2-2.75-2.33-2.75A2.51,2.51,0,0,0,13.5,14h0V13H11.5v5h2V15.5c0-.84.16-1.65,1.18-1.65s1.32.81,1.32,1.7V18h2Z" />}
+                    </svg>
+                  </motion.a>
+                ))}
+              </div>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-blue-400 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="text-gray-400">123 Vision Street, Eye Care City, EC 12345</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-blue-400 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-gray-400">info@visionrestorationcenter.com</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-blue-400 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <span className="text-gray-400">+1 (555) 123-4567</span>
+                </li>
+              </ul>
+            </motion.div>
+          </div>
+          
+          <div className="flex flex-col md:flex-row justify-between items-center pt-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="mb-4 md:mb-0"
+            >
+              <p className="text-gray-400 text-sm">
+                &copy; {new Date().getFullYear()} Vision Restoration Center. All rights reserved.
+              </p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="text-center md:text-right"
+            >
+              <p className="text-gray-400 mb-2">Developed and Designed by:</p>
+              <motion.p 
+                className="text-sm text-blue-300 font-medium"
+                whileHover={{ scale: 1.02 }}
+              >
+                Mick Suraj, Diana Regi, K R Muhammad Adnan, Haisel Davis
+              </motion.p>
+            </motion.div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

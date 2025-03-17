@@ -46,10 +46,12 @@ export function RecipientTable() {
 
   const handleClick = () => {
     setIsLoading(true);
+    // Show all rows immediately
+    setVisibleRows(recipients.length);
+    // Add a small delay just for loading animation
     setTimeout(() => {
       setIsLoading(false);
-      setVisibleRows(recipients.length);
-    }, 1000);
+    }, 500);
   };
 
   const handleShowLess = () => {
@@ -291,7 +293,7 @@ export function RecipientTable() {
             />
             <Button
               onClick={handleClick}
-              disabled={isLoading || visibleRows === recipients.length}
+              disabled={isLoading}
               className="bg-blue-600 hover:bg-blue-700 text-white"
               text={isLoading ? 'Loading...' : 'Show All'}
             />

@@ -19,6 +19,8 @@ import { Tables } from './components/table';
 import { RecipientTable } from './components/RecipientTable';
 import UserProfile from './components/UserProfile';
 import ResourcesPage from './components/ResourcesPage';
+import Feedback from './components/Feedback';
+import FeedbackManagement from './components/FeedbackManagement';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { getChatResponse } from './utils/eyeTransplantQA';
 
@@ -178,6 +180,21 @@ const AnimatedRoutes = () => {
           </ProtectedRoute>
         } />
         
+        <Route path="/feedback" element={
+          <ProtectedRoute>
+            <motion.div
+              key="feedback"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="page-container"
+            >
+              <Feedback />
+            </motion.div>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/transplant-game" element={
           <ProtectedRoute>
             <motion.div
@@ -220,6 +237,21 @@ const AnimatedRoutes = () => {
               className="page-container"
             >
               <Dashboard />
+            </motion.div>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/feedback-management" element={
+          <ProtectedRoute requiredRole="admin">
+            <motion.div
+              key="feedback-management"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="page-container"
+            >
+              <FeedbackManagement />
             </motion.div>
           </ProtectedRoute>
         } />

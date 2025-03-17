@@ -46,10 +46,12 @@ export function Tables() {
   
   const handleClick = () => {
     setIsLoading(true);
+    // Show all rows immediately
+    setVisibleRows(donors.length);
+    // Add a small delay just for loading animation
     setTimeout(() => {
       setIsLoading(false);
-      setVisibleRows(donors.length);
-    }, 1000);
+    }, 500);
   };
 
   const handleShowLess = () => {
@@ -81,9 +83,15 @@ export function Tables() {
   };
 
   const getScoreColor = (score) => {
-    if (score >= 80) return 'bg-green-100 text-green-800 ring-green-600/20';
-    if (score >= 60) return 'bg-yellow-100 text-yellow-800 ring-yellow-600/20';
+    if (score >= 8) return 'bg-green-100 text-green-800 ring-green-600/20';
+    if (score >= 5) return 'bg-yellow-100 text-yellow-800 ring-yellow-600/20';
     return 'bg-red-100 text-red-800 ring-red-600/20';
+  };
+
+  const getUrgencyColor = (score) => {
+    if (score >= 8) return 'bg-red-100 text-red-800 ring-red-600/20';
+    if (score >= 5) return 'bg-yellow-100 text-yellow-800 ring-yellow-600/20';
+    return 'bg-green-100 text-green-800 ring-green-600/20';
   };
 
   const filteredAndSortedData = [...donors]
@@ -284,7 +292,7 @@ export function Tables() {
             />
             <Button
               onClick={handleClick}
-              disabled={isLoading || visibleRows === donors.length}
+              disabled={isLoading}
               className="bg-blue-600 hover:bg-blue-700 text-white"
               text={isLoading ? 'Loading...' : 'Show All'}
             />
