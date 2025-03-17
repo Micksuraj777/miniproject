@@ -290,16 +290,17 @@ export function Tables() {
               className="bg-green-600 hover:bg-green-700 text-white"
               text="Add Donor"
             />
-            <Button
-              onClick={handleClick}
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-              text={isLoading ? 'Loading...' : 'Show All'}
-            />
-            {visibleRows > 7 && (
+            {visibleRows <= 7 ? (
+              <Button
+                onClick={handleClick}
+                disabled={isLoading}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                text={isLoading ? 'Loading...' : 'Show All'}
+              />
+            ) : (
               <Button
                 onClick={handleShowLess}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800"
+                className="bg-red-600 hover:bg-red-700 text-white"
                 text="Show Less"
               />
             )}
