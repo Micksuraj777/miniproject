@@ -20,7 +20,7 @@ This system is created to help hospitals, eye banks, and organizations to:
   Support for different types of users like:
   - Admin
   - Donor
-  - Requester
+  - Recipient
 
 - 📊 **Analytics Dashboard**  
   Visual overview of donations, requests, and tissue availability.
@@ -89,6 +89,6 @@ On Windows:
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
 
