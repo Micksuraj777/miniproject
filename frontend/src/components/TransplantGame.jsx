@@ -25,20 +25,20 @@ const TransplantGame = () => {
     },
     {
       id: 'patient',
-      name: 'Ms. Haisel',
+      name: 'Mr. Adnan',
       role: 'Former Patient',
       description: 'A recipient who has gone through the procedure and can share personal insights.',
-      avatar: '😊',
+      avatar: '🤵',
       color: 'green',
       style: 'supportive',
       encouragement: 'I was nervous before my transplant too, but knowledge made all the difference in my recovery journey.'
     },
     {
       id: 'nurse',
-      name: 'Nurse Adnan',
+      name: 'Nurse Haibal',
       role: 'Transplant Coordinator',
       description: 'A specialist who coordinates the entire transplantation process from evaluation to recovery.',
-      avatar: '👨‍⚕️',
+      avatar: '👩🏼‍⚕️',
       color: 'purple',
       style: 'organized',
       encouragement: 'My job is to make sure everything goes smoothly. Let me help you understand each step of this journey.'

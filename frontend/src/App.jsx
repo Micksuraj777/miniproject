@@ -958,7 +958,7 @@ const App = () => {
               <AIChatModal />
             </>
           )}
-        </div>
+        </div>+
       </AuthProvider>
       </Router>
   );

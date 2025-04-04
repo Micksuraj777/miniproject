@@ -155,6 +155,30 @@ const UserHome = () => {
     document.body.style.overflow = 'auto';
   };
 
+  const formatUserName = (user) => {
+    let name = user.displayName || user.email?.split('@')[0] || 'Friend';
+
+    // Remove dots from the name
+    name = name.replace(/\./g, '');
+
+    // Split the name into words based on capital letters or underscores
+    let parts = name.split(/(?=[A-Z])|_/).filter(Boolean);
+
+    if (parts.length > 1) {
+        // Capitalize first name (first letter uppercase, rest lowercase)
+        parts[0] = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+
+        // Capitalize entire last name
+        parts[parts.length - 1] = parts[parts.length - 1].toUpperCase();
+    } else {
+        // If there's only one part, capitalize first letter only
+        parts[0] = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+    }
+
+    // Join parts with a space
+    return parts.join(' ');
+};
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Hero Section */}
@@ -219,7 +243,7 @@ const UserHome = () => {
                         repeatType: "reverse" 
                       }}
                     >
-                      {greeting}, {currentUser.displayName || currentUser.email?.split('@')[0] || 'Friend'}!
+                      {greeting}, {formatUserName(currentUser)}!
                     </motion.p>
                   </motion.div>
                 )}
@@ -1197,7 +1221,7 @@ const UserHome = () => {
                 className="text-sm text-blue-300 font-medium"
                 whileHover={{ scale: 1.02 }}
               >
-                Mick Suraj, Diana Regi, K R Muhammad Adnan, Haisel Davis
+                Mick Suraj, Diana Regi, K R Muhammad Adnan, Haibal Davis
               </motion.p>
             </motion.div>
           </div>

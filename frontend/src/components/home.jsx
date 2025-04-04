@@ -349,7 +349,7 @@ const Home = () => {
                 className="text-sm text-blue-300 font-medium"
                 whileHover={{ scale: 1.02 }}
               >
-                Mick Suraj, Diana Regi, K R Muhammad Adnan, Haisel Davis
+                Mick Suraj, Diana Regi, K R Muhammad Adnan, Haibal Davis
               </motion.p>
             </motion.div>
           </div>
