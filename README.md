@@ -61,7 +61,7 @@ Let's divide this into 2 parts:
 
 ### 🚀 Steps
 
-1️⃣ Open your terminal and go to the `frontend` folder:
+1️⃣ Open your terminal and go to the `miniproject` folder:
 
 ```bash
 cd frontend
