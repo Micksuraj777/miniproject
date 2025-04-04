@@ -34,7 +34,7 @@ This system is created to help hospitals, eye banks, and organizations to:
 |-----------|------------------------|
 | Frontend  | React.js + Tailwind CSS |
 | Backend   | Java Spring Boot (Maven) |
-| Database  | (Add DB here - MySQL, H2, etc.) |
+| Database  | (Add DB here - MySQL) |
 
 ---
 
