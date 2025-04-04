@@ -49,12 +49,15 @@ Let's divide this into 2 parts:
 
 ---
 
-## 🎨 Frontend Setup (React + Tailwind CSS)
+## 🎨 Frontend Setup (React with Tailwind CSS) + 🔧 Backend Setup (Spring Boot with Maven)
 
 ### ✅ Prerequisites
 
 - Node.js installed
 - npm (comes with Node)
+- ☕ Java 17 or above
+- 📦 Maven
+- 🖥️ (Optional) An IDE like IntelliJ IDEA or Visual Studio Code
 
 ### 🚀 Steps
 
@@ -66,21 +69,12 @@ cd frontend
 ```bash
     npm install
 
+```bash
     npm run dev 
 
 🖥️ The app will run at: http://localhost:3000
+
 ```bash
-
-## 🔧 Backend Setup (Spring Boot with Maven)
-
-### ✅ Prerequisites
-
-Before you start, make sure the following are installed on your system:
-
-- ☕ Java 17 or above
-- 📦 Maven
-- 🖥️ (Optional) An IDE like IntelliJ IDEA or Visual Studio Code
-
 cd backend
 
 On Linux/macOS:
