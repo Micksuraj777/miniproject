@@ -69,6 +69,7 @@ cd frontend
     npm run dev 
 
 🖥️ The app will run at: http://localhost:3000
+```bash
 
 ## 🔧 Backend Setup (Spring Boot with Maven)
 
@@ -76,9 +77,9 @@ cd frontend
 
 Before you start, make sure the following are installed on your system:
 
-- ☕ **Java 17** or above
-- 📦 **Maven**
-- 🖥️ *(Optional)* An IDE like **IntelliJ IDEA** or **Visual Studio Code**
+- ☕ Java 17 or above
+- 📦 Maven
+- 🖥️ (Optional) An IDE like IntelliJ IDEA or Visual Studio Code
 
 cd backend
 
